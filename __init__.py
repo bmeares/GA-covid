@@ -10,7 +10,7 @@ from __future__ import annotations
 from meerschaum.utils.typing import Optional
 from meerschaum.config._paths import PLUGINS_TEMP_RESOURCES_PATH
 import datetime, pathlib
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 TMP_PATH = PLUGINS_TEMP_RESOURCES_PATH / 'GA-covid_data'
 ZIP_URL = 'https://ga-covid19.ondemand.sas.com/docs/ga_covid_data.zip'
 ZIP_PATH = TMP_PATH / 'ga_covid_data.zip'
@@ -67,7 +67,10 @@ def fetch(
     from meerschaum.utils.misc import wget
     import duckdb
     import pandas as pd
+    import shutil
     TMP_PATH.mkdir(exist_ok=True, parents=True)
+    if UNZIP_PATH.exists():
+        shutil.rmtree(UNZIP_PATH)
     wget(ZIP_URL, ZIP_PATH)
     with zipfile.ZipFile(ZIP_PATH, 'r') as zip_ref:
         zip_ref.extractall(UNZIP_PATH)
@@ -99,9 +102,9 @@ def fetch(
     )
     begin = begin if begin is not None else pipe.get_sync_time(debug=debug)
     if begin is not None:
-        query += f"\n    AND CAST(d.date AS DATE) >= CAST('{begin}' AS DATE)"
+        query += f"\n    AND CAST(d.report_date AS DATE) >= CAST('{begin}' AS DATE)"
     if end is not None:
-        query += f"\n    AND CAST(d.date AS DATE) <= CAST('{end}' AS DATE)"
+        query += f"\n    AND CAST(d.report_date AS DATE) <= CAST('{end}' AS DATE)"
     result = duckdb.query(query)
     df = result.df()[dtypes.keys()].astype(dtypes)
     return df
