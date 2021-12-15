@@ -10,7 +10,7 @@ from __future__ import annotations
 from meerschaum.utils.typing import Optional
 from meerschaum.config._paths import PLUGINS_TEMP_RESOURCES_PATH
 import datetime, pathlib
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 TMP_PATH = PLUGINS_TEMP_RESOURCES_PATH / 'GA-covid_data'
 ZIP_URL = 'https://ga-covid19.ondemand.sas.com/docs/ga_covid_data.zip'
 ZIP_PATH = TMP_PATH / 'ga_covid_data.zip'
@@ -102,6 +102,7 @@ def fetch(
     )
     begin = begin if begin is not None else pipe.get_sync_time(debug=debug)
     if begin is not None:
+        begin -= datetime.timedelta(days=2)
         query += f"\n    AND CAST(d.report_date AS DATE) >= CAST('{begin}' AS DATE)"
     if end is not None:
         query += f"\n    AND CAST(d.report_date AS DATE) <= CAST('{end}' AS DATE)"
